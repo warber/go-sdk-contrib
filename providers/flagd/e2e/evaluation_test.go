@@ -1,9 +1,9 @@
-//go:build e2e
-
 package e2e
 
 import (
+	"context"
 	"flag"
+	"github.com/open-feature/go-sdk-contrib/providers/flagd/e2e/containers"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -18,6 +18,10 @@ func TestETestEvaluationFlagdInRPC(t *testing.T) {
 		t.Skip()
 	}
 
+	container, err := containers.NewFlagd(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
 	flag.Parse()
 
 	name := "evaluation.feature"
@@ -25,7 +29,7 @@ func TestETestEvaluationFlagdInRPC(t *testing.T) {
 	testSuite := godog.TestSuite{
 		Name: name,
 		TestSuiteInitializer: integration.InitializeTestSuite(func() openfeature.FeatureProvider {
-			return flagd.NewProvider(flagd.WithPort(8013))
+			return flagd.NewProvider(flagd.WithPort(uint16(container.GetPort())))
 		}),
 		ScenarioInitializer: integration.InitializeEvaluationScenario,
 		Options: &godog.Options{
